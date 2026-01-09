@@ -5,12 +5,14 @@ const auth = require("../middleware/auth");
 const db = require("../db");
 const { uploadToR2, deleteFromR2 } = require("../services/r2");
 
-// Konfigurasi Multer dengan error handling
-const upload = multer({ 
+/* ==========================
+   MULTER CONFIG
+========================== */
+const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB max per file
-        files: 10 // max 10 files
+        fileSize: 50 * 1024 * 1024, // 50MB
+        files: 10
     }
 });
 
@@ -22,105 +24,67 @@ router.get("/", async (req, res) => {
         const [rows] = await db.query(
             "SELECT id, nama, judul, tanggal, file_url FROM presentations ORDER BY tanggal DESC"
         );
-
         res.json({ data: rows });
     } catch (err) {
-        console.error(err);
+        console.error("GET presentations error:", err.message);
         res.status(500).json({ message: "Gagal mengambil data" });
     }
 });
 
 /* ==========================
    CREATE – MULTIPLE FILES
-   Urutan: upload → auth → handler
+   URUTAN BENAR: auth → upload → handler
 ========================== */
-router.post("/", 
-    (req, res, next) => {
-        upload.array("files", 10)(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                console.error("Multer error:", err);
-                return res.status(400).json({ 
-                    message: `Upload error: ${err.message}` 
-                });
-            } else if (err) {
-                console.error("Unknown upload error:", err);
-                return res.status(500).json({ 
-                    message: "Upload failed" 
-                });
-            }
-            next();
-        });
-    },
+router.post(
+    "/",
     auth,
+    upload.array("files", 10),
     async (req, res) => {
         try {
-            console.log("=== POST /presentations ===");
-            console.log("Files received:", req.files?.length || 0);
-            console.log("Body:", req.body);
-
             const { nama, judul, tanggal } = req.body;
             const files = req.files;
 
-            // Validasi
             if (!nama || !judul || !tanggal) {
-                return res.status(400).json({ 
-                    message: "Nama, judul, dan tanggal wajib diisi" 
+                return res.status(400).json({
+                    message: "Nama, judul, dan tanggal wajib diisi"
                 });
             }
 
             if (!files || files.length === 0) {
-                console.log("❌ No files in req.files");
-                return res.status(400).json({ 
-                    message: "File wajib diupload" 
+                return res.status(400).json({
+                    message: "File wajib diupload"
                 });
             }
 
-            console.log(`✅ Processing ${files.length} file(s)...`);
-            const uploadedFiles = [];
+            const insertPromises = [];
 
-            // Upload semua file ke R2
             for (const file of files) {
                 const key = `presentations/${Date.now()}-${file.originalname}`;
-                
-                console.log(`Uploading: ${file.originalname} (${file.size} bytes)`);
-                
+
                 const fileUrl = await uploadToR2(
                     file.buffer,
                     key,
                     file.mimetype
                 );
 
-                uploadedFiles.push({
-                    nama,
-                    judul,
-                    tanggal,
-                    file_url: fileUrl,
-                    filename: file.originalname
-                });
-
-                console.log(`✅ Uploaded: ${fileUrl}`);
+                insertPromises.push(
+                    db.query(
+                        "INSERT INTO presentations (nama, judul, tanggal, file_url) VALUES (?, ?, ?, ?)",
+                        [nama, judul, tanggal, fileUrl]
+                    )
+                );
             }
 
-            // Insert semua ke database
-            const promises = uploadedFiles.map(fileData => 
-                db.query(
-                    "INSERT INTO presentations (nama, judul, tanggal, file_url) VALUES (?, ?, ?, ?)",
-                    [fileData.nama, fileData.judul, fileData.tanggal, fileData.file_url]
-                )
-            );
+            await Promise.all(insertPromises);
 
-            await Promise.all(promises);
-
-            console.log(`✅ ${files.length} file(s) successfully saved to DB`);
-
-            res.json({ 
+            res.json({
                 message: `${files.length} file berhasil diupload`,
-                count: files.length 
+                count: files.length
             });
 
         } catch (err) {
-            console.error("❌ Upload error:", err);
-            res.status(500).json({ message: "Upload gagal: " + err.message });
+            console.error("POST presentations error:", err.message);
+            res.status(500).json({ message: "Upload gagal" });
         }
     }
 );
@@ -141,8 +105,9 @@ router.delete("/:id", auth, async (req, res) => {
             return res.status(404).json({ message: "Data tidak ditemukan" });
         }
 
+        // Ambil key setelah bucket name
         const key = decodeURIComponent(
-            row.file_url.split(`${process.env.R2_BUCKET_NAME}/`)[1]
+            row.file_url.split(`/${process.env.R2_BUCKET_NAME}/`)[1]
         );
 
         await deleteFromR2(key);
@@ -151,7 +116,7 @@ router.delete("/:id", auth, async (req, res) => {
         res.json({ message: "Data berhasil dihapus" });
 
     } catch (err) {
-        console.error(err);
+        console.error("DELETE presentations error:", err.message);
         res.status(500).json({ message: "Gagal menghapus data" });
     }
 });
