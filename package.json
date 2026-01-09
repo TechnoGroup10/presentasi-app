@@ -4,8 +4,8 @@
   "description": "Backend untuk aplikasi direktori presentasi (Node.js + Express + MySQL + Cloudflare R2)",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.947.0",
