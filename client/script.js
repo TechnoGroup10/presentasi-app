@@ -1,6 +1,5 @@
-const API_URL = location.hostname === "localhost"
-    ? "http://localhost:3001/api"
-    : "https://NAMA-BACKEND.up.railway.app/api";
+const API_URL = "https://mysql-production-680ce.up.railway.app";
+
 
 
 /* ==========================
