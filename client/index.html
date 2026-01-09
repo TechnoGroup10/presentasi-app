@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentasi Directory</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="loginBtn" class="login-btn">Login</button>
+
+<!-- Login Modal -->
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Login</h2>
+
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+
+        <!-- PENTING: pakai ID, TANPA onclick -->
+        <button id="loginSubmitBtn">Login</button>
+
+        <p id="loginStatus"></p>
+    </div>
+</div>
+
+<div class="container">
+
+    <h1>Direktori Presentasi</h1>
+    <p class="subtitle">Kelola dan Bagikan Presentasi Anda</p>
+
+    <button id="toggleFormBtn" class="add-btn hidden">+ Tambah Data</button>
+
+    <div class="card hidden" id="uploadCard">
+        <h2>Upload Presentasi</h2>
+
+        <form id="uploadForm">
+            <label>Nama Presenter</label>
+            <input type="text" id="presenter_name" required>
+
+            <label>Judul Presentasi</label>
+            <input type="text" id="title" required>
+
+            <label>Jadwal Presentasi</label>
+            <input type="datetime-local" id="schedule" required>
+
+            <label>File</label>
+            <input type="file" id="file" multiple required>
+
+            <button type="submit">Upload</button>
+        </form>
+
+        <p id="uploadStatus"></p>
+    </div>
+
+    <div class="card">
+        <h2>Daftar Presentasi</h2>
+        <table id="presentationTable">
+            <thead>
+                <tr>
+                    <th>Presenter</th>
+                    <th>Judul</th>
+                    <th>Jadwal</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

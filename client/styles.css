@@ -1,0 +1,573 @@
+/* ============================================
+   RESET & BASE STYLES
+============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ============================================
+   CONTAINER & LAYOUT
+============================================ */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ============================================
+   TYPOGRAPHY
+============================================ */
+h1 {
+    text-align: center;
+    color: #1a1a1a;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #dc2626;
+    font-size: 1rem;
+    margin-bottom: 40px;
+    font-weight: 500;
+}
+
+/* ============================================
+   CARD COMPONENT
+============================================ */
+.card {
+    background: white;
+    padding: 35px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-top: 4px solid #dc2626;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(220, 38, 38, 0.2);
+}
+
+.card h2 {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    font-weight: 600;
+    border-bottom: 3px solid #dc2626;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* ============================================
+   FORM ELEMENTS
+============================================ */
+label {
+    display: block;
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="datetime-local"],
+input[type="file"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+input[type="text"]:focus,
+input[type="datetime-local"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #dc2626;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+input[type="file"] {
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* ============================================
+   BUTTONS - GENERAL
+============================================ */
+button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+button:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Add Button */
+.add-btn {
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #111 0%, #333 100%);
+}
+
+/* Login Button */
+.login-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: auto;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    z-index: 1000;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+/* ============================================
+   UPLOAD STATUS MESSAGE
+============================================ */
+#uploadStatus,
+#loginStatus {
+    margin-top: 15px;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    display: none;
+}
+
+#uploadStatus.show,
+#loginStatus.show {
+    display: block;
+}
+
+#uploadStatus.success {
+    background: #dcfce7;
+    color: #166534;
+    border: 2px solid #bbf7d0;
+}
+
+#uploadStatus.error,
+#loginStatus.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 2px solid #fecaca;
+}
+
+#uploadStatus.loading,
+#loginStatus.loading {
+    background: #fef3c7;
+    color: #92400e;
+    border: 2px solid #fde68a;
+}
+
+/* ============================================
+   TABLE STYLES
+============================================ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    table-layout: fixed;
+}
+
+thead {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+th {
+    padding: 16px 12px;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+th:nth-child(1) { width: 15%; }  /* Presenter */
+th:nth-child(2) { width: 20%; }  /* Judul */
+th:nth-child(3) { width: 18%; }  /* Jadwal */
+th:nth-child(4) { width: 47%; }  /* Aksi - lebih lebar untuk file list */
+
+tbody tr {
+    border-bottom: 1px solid #e5e5e5;
+    transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+    background: #fef2f2;
+}
+
+td {
+    padding: 16px 12px;
+    color: #1a1a1a;
+    vertical-align: top;
+    word-wrap: break-word;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}
+
+/* ============================================
+   FILES CONTAINER - GROUPED FILES
+============================================ */
+.files-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.file-item {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+    border-radius: 8px;
+    border-left: 4px solid #dc2626;
+    transition: all 0.3s ease;
+}
+
+.file-item:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.file-badge {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+}
+
+.file-name {
+    font-size: 13px;
+    color: #1a1a1a;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.file-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    justify-content: flex-end;
+}
+
+/* ============================================
+   ACTION BUTTONS - FILE ACTIONS
+============================================ */
+
+/* Base style for all action buttons */
+.file-actions .btn-view,
+.file-actions .btn-delete,
+.file-actions .btn-download {
+    position: relative;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    line-height: 1;
+}
+
+/* View Button - Blue Theme */
+.file-actions .btn-view {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.file-actions .btn-view:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}
+
+/* Download Button - Green Theme */
+.file-actions .btn-download {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.file-actions .btn-download:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Delete Button - Red Theme */
+.file-actions .btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.file-actions .btn-delete:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+}
+
+/* Active state */
+.file-actions .btn-view:active,
+.file-actions .btn-delete:active,
+.file-actions .btn-download:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   MODAL STYLES
+============================================ */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 40px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border-top: 4px solid #dc2626;
+    animation: slideDown 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close {
+    color: #999;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 35px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #dc2626;
+    transform: rotate(90deg);
+}
+
+.modal-content h2 {
+    color: #1a1a1a;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    font-weight: 600;
+    border-bottom: 3px solid #dc2626;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+============================================ */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 25px;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 12px 8px;
+    }
+    
+    /* Adjust column widths for tablet */
+    th:nth-child(1) { width: 18%; }
+    th:nth-child(2) { width: 22%; }
+    th:nth-child(3) { width: 20%; }
+    th:nth-child(4) { width: 40%; }
+    
+    .file-item {
+        grid-template-columns: 28px 1fr;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+    
+    .file-badge {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    
+    .file-name {
+        font-size: 12px;
+        grid-column: 2 / 3;
+    }
+    
+    .file-actions {
+        grid-column: 2 / 3;
+        justify-content: flex-start;
+        gap: 4px;
+    }
+    
+    .file-actions .btn-view,
+    .file-actions .btn-delete,
+    .file-actions .btn-download {
+        padding: 5px 8px;
+        font-size: 10px;
+        gap: 2px;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 0;
+    }
+    
+    .card {
+        border-radius: 0;
+        margin-bottom: 15px;
+    }
+    
+    /* Make table scrollable on small screens */
+    .card:has(table) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 600px;
+        font-size: 0.85rem;
+    }
+    
+    th, td {
+        padding: 10px 6px;
+    }
+    
+    .file-badge {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+    
+    .file-name {
+        font-size: 11px;
+    }
+    
+    .file-actions .btn-view,
+    .file-actions .btn-delete,
+    .file-actions .btn-download {
+        padding: 4px 6px;
+        font-size: 9px;
+        gap: 2px;
+    }
+}
