@@ -1,34 +1,30 @@
-require("dotenv").config();
 const express = require("express");
-const helmet = require("helmet");
 const cors = require("cors");
-const morgan = require("morgan");
-const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-app.use(helmet());
-app.use(cors());
+/* ===== CORS CONFIG (WAJIB DI ATAS) ===== */
+app.use(cors({
+    origin: [
+        "https://presentasi-nqbodj3pl-ikys-projects-7b9255e9.vercel.app"
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+/* Preflight */
+app.options("*", cors());
+
+/* Middleware lain */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev"));
 
-// API routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/presentations", require("./routes/presentations"));
+/* Routes */
+app.use("/auth", require("./routes/auth"));
+app.use("/presentations", require("./routes/presentations"));
 
-// Health check
-app.get("/health", (req, res) => {
-    res.json({ status: "ok" });
-});
-
-// Serve frontend (optional, jika digabung)
-app.use(express.static(path.join(__dirname, "../client")));
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client/index.html"));
-});
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server berjalan pada http://localhost:${PORT}`);
+    console.log("Server running on port", PORT);
 });
