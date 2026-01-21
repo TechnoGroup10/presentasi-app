@@ -1,19 +1,44 @@
+const express = require("express");
+const router = express.Router();
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const db = require("../db");
 
-module.exports = function (req, res, next) {
-    const authHeader = req.headers.authorization;
+router.post("/login", async (req, res) => {
+    const { username, password } = req.body;
 
-    if (!authHeader) {
-        return res.status(401).json({ message: "Unauthorized" });
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username dan password wajib diisi" });
     }
-
-    const token = authHeader.split(" ")[1];
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
+        const [[user]] = await db.query(
+            "SELECT * FROM users WHERE username = ?",
+            [username]
+        );
+
+        if (!user) {
+            return res.status(401).json({ message: "Username atau password salah" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: "Username atau password salah" });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, username: user.username },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES }
+        );
+
+        res.json({ token });
+
     } catch (err) {
-        return res.status(401).json({ message: "Token tidak valid" });
+        console.error("LOGIN ERROR:", err);
+        res.status(500).json({ message: "Server error" });
     }
-};
+});
+
+module.exports = router;
