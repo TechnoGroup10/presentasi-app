@@ -26,8 +26,11 @@ router.get("/", async (req, res) => {
         );
         res.json({ data: rows });
     } catch (err) {
-        console.error("GET presentations error:", err.message);
-        res.status(500).json({ message: "Gagal mengambil data" });
+        console.error("❌ DB ERROR:", err);
+        res.status(500).json({
+            message: "Gagal mengambil data",
+            error: err.message
+        });
     }
 });
 
