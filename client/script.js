@@ -173,6 +173,110 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadPresentations() {
     const tbody = document.querySelector("#presentationTable tbody");
+    const isMobile = window.innerWidth <= 600;
+    
+    if (isMobile) {
+        const container = tbody.closest('.card');
+        container.innerHTML = '<h2>Daftar Presentasi</h2><div id="mobileContainer"></div>';
+        const mobileContainer = container.querySelector('#mobileContainer');
+        mobileContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Memuat data...</p>';
+        
+        try {
+            const res = await fetch(`${API_URL}/presentations`);
+            const json = await res.json();
+            const data = json.data || [];
+
+            mobileContainer.innerHTML = "";
+
+            if (data.length === 0) {
+                mobileContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Belum ada data.</p>';
+                return;
+            }
+
+            // Group files dengan presenter, judul, dan jadwal yang sama
+            const grouped = {};
+            
+            data.forEach(item => {
+                const key = `${item.nama}|||${item.judul}|||${item.tanggal}`;
+                
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        nama: item.nama,
+                        judul: item.judul,
+                        tanggal: item.tanggal,
+                        files: []
+                    };
+                }
+                
+                grouped[key].files.push({
+                    id: item.id,
+                    file_url: item.file_url,
+                    filename: getFilenameFromUrl(item.file_url)
+                });
+            });
+
+            const isLoggedIn = !!localStorage.getItem("token");
+
+            // Render mobile cards
+            Object.values(grouped).forEach(group => {
+                mobileContainer.insertAdjacentHTML("beforeend", `
+                    <div class="presentation-card">
+                        <div class="presentation-info">
+                            <h3>${group.judul}</h3>
+                            <p class="presenter">👤 ${group.nama}</p>
+                            <p class="schedule">📅 ${new Date(group.tanggal).toLocaleDateString("id-ID", {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</p>
+                        </div>
+                        <div class="files-container">
+                            ${group.files.map((file, idx) => `
+                                <div class="file-item">
+                                    <span class="file-badge">${idx + 1}</span>
+                                    <span class="file-name">${file.filename}</span>
+                                    <div class="file-actions">
+                                        <button 
+                                            class="btn-view"
+                                            data-url="${file.file_url}"
+                                            title="Lihat file">
+                                            👁️ View
+                                        </button>
+                                        <a 
+                                            href="${file.file_url}" 
+                                            target="_blank"
+                                            class="btn-download"
+                                            title="Download">
+                                            ⬇️ Download
+                                        </a>
+                                        ${isLoggedIn ? `
+                                            <button 
+                                                class="btn-delete"
+                                                data-id="${file.id}"
+                                                title="Hapus file">
+                                                🗑️ Delete
+                                            </button>
+                                        ` : ""}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `);
+            });
+
+        } catch (err) {
+            console.error(err);
+            mobileContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #dc2626;">Gagal memuat data</p>';
+        }
+        
+        return;
+    }
+    
+    // Desktop/tablet table view
     tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Memuat data...</td></tr>`;
 
     try {

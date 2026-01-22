@@ -474,100 +474,218 @@ td {
    RESPONSIVE DESIGN
 ============================================ */
 @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
     h1 {
         font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 25px;
     }
 
     .card {
-        padding: 25px;
+        padding: 20px;
+        margin-bottom: 20px;
     }
 
-    table {
+    .login-btn {
+        top: 10px;
+        right: 10px;
+        padding: 10px 20px;
         font-size: 0.9rem;
     }
 
-    th, td {
-        padding: 12px 8px;
+    /* Card layout untuk mobile - vertikal */
+    .presentation-card {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #dc2626;
     }
-    
-    /* Adjust column widths for tablet */
-    th:nth-child(1) { width: 18%; }
-    th:nth-child(2) { width: 22%; }
-    th:nth-child(3) { width: 20%; }
-    th:nth-child(4) { width: 40%; }
-    
+
+    .presentation-card:hover {
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+    }
+
+    .presentation-info {
+        margin-bottom: 12px;
+    }
+
+    .presentation-info h3 {
+        color: #1a1a1a;
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+
+    .presentation-info .presenter {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+
+    .presentation-info .schedule {
+        color: #dc2626;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* File items untuk mobile */
     .file-item {
-        grid-template-columns: 28px 1fr;
-        gap: 8px;
-        padding: 8px 10px;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        padding: 10px;
+        margin-bottom: 8px;
     }
     
     .file-badge {
-        width: 24px;
-        height: 24px;
-        font-size: 11px;
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
     }
     
     .file-name {
-        font-size: 12px;
+        font-size: 13px;
         grid-column: 2 / 3;
+        margin-bottom: 8px;
     }
     
     .file-actions {
         grid-column: 2 / 3;
         justify-content: flex-start;
-        gap: 4px;
+        gap: 6px;
+        flex-wrap: wrap;
     }
     
     .file-actions .btn-view,
     .file-actions .btn-delete,
     .file-actions .btn-download {
-        padding: 5px 8px;
-        font-size: 10px;
-        gap: 2px;
+        padding: 8px 12px;
+        font-size: 11px;
+        gap: 4px;
+        flex: 1;
+        min-width: 80px;
     }
 }
 
 @media (max-width: 600px) {
+    body {
+        padding: 5px;
+        background: #f9fafb;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+    }
+
     .container {
         padding: 0;
     }
     
     .card {
-        border-radius: 0;
+        border-radius: 12px;
         margin-bottom: 15px;
+        padding: 16px;
     }
-    
-    /* Make table scrollable on small screens */
-    .card:has(table) {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+
+    .card h2 {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
     }
-    
-    table {
-        min-width: 600px;
+
+    .login-btn {
+        padding: 8px 16px;
         font-size: 0.85rem;
     }
-    
-    th, td {
-        padding: 10px 6px;
+
+    /* Form inputs untuk mobile */
+    input[type="text"],
+    input[type="datetime-local"],
+    input[type="file"],
+    input[type="password"] {
+        padding: 10px 12px;
+        margin-bottom: 15px;
+        font-size: 16px; /* Prevent zoom on iOS */
     }
-    
-    .file-badge {
-        width: 22px;
-        height: 22px;
-        font-size: 10px;
+
+    label {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
     }
-    
+
+    button {
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    /* Hide table, show card layout */
+    table {
+        display: none;
+    }
+
+    /* Modal untuk mobile */
+    .modal-content {
+        width: 95%;
+        margin: 20% auto;
+        padding: 25px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+
+    .close {
+        right: 15px;
+        top: 10px;
+        font-size: 30px;
+    }
+
+    /* File items optimization */
+    .file-item {
+        padding: 12px;
+    }
+
     .file-name {
-        font-size: 11px;
+        font-size: 12px;
+        line-height: 1.4;
+        white-space: normal;
+        margin-bottom: 10px;
+    }
+
+    .file-actions {
+        gap: 8px;
+        width: 100%;
     }
     
     .file-actions .btn-view,
     .file-actions .btn-delete,
     .file-actions .btn-download {
-        padding: 4px 6px;
-        font-size: 9px;
-        gap: 2px;
+        padding: 10px 14px;
+        font-size: 12px;
+        min-width: 90px;
+        justify-content: center;
+    }
+
+    /* Spacing adjustments */
+    .add-btn {
+        margin-bottom: 20px;
+    }
+
+    .files-container {
+        gap: 10px;
     }
 }
