@@ -48,8 +48,8 @@ loginSubmitBtn.addEventListener("click", async () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username: usernameInput.value,
-                password: passwordInput.value
+                username,
+                password
             })
         });
 
