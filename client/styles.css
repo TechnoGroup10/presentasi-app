@@ -631,8 +631,8 @@ td {
         font-size: 1rem;
     }
 
-    /* Hide table, show card layout */
-    table {
+    /* Hide table in mobile, will be replaced by cards via JS */
+    #presentationTable {
         display: none;
     }
 

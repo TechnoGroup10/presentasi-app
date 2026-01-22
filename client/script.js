@@ -172,50 +172,54 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function loadPresentations() {
+    const tableCard = document.querySelector("#presentationTable").closest('.card');
     const tbody = document.querySelector("#presentationTable tbody");
     const isMobile = window.innerWidth <= 600;
     
-    if (isMobile) {
-        const container = tbody.closest('.card');
-        container.innerHTML = '<h2>Daftar Presentasi</h2><div id="mobileContainer"></div>';
-        const mobileContainer = container.querySelector('#mobileContainer');
-        mobileContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Memuat data...</p>';
-        
-        try {
-            const res = await fetch(`${API_URL}/presentations`);
-            const json = await res.json();
-            const data = json.data || [];
+    try {
+        const res = await fetch(`${API_URL}/presentations`);
+        const json = await res.json();
+        const data = json.data || [];
 
-            mobileContainer.innerHTML = "";
+        // Group files dengan presenter, judul, dan jadwal yang sama
+        const grouped = {};
+        
+        data.forEach(item => {
+            const key = `${item.nama}|||${item.judul}|||${item.tanggal}`;
+            
+            if (!grouped[key]) {
+                grouped[key] = {
+                    nama: item.nama,
+                    judul: item.judul,
+                    tanggal: item.tanggal,
+                    files: []
+                };
+            }
+            
+            grouped[key].files.push({
+                id: item.id,
+                file_url: item.file_url,
+                filename: getFilenameFromUrl(item.file_url)
+            });
+        });
+
+        const isLoggedIn = !!localStorage.getItem("token");
+
+        if (isMobile) {
+            // Mobile view - gunakan cards
+            let mobileContainer = tableCard.querySelector('#mobileContainer');
+            
+            if (!mobileContainer) {
+                tableCard.innerHTML = '<h2>Daftar Presentasi</h2><div id="mobileContainer"></div>';
+                mobileContainer = tableCard.querySelector('#mobileContainer');
+            }
 
             if (data.length === 0) {
                 mobileContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Belum ada data.</p>';
                 return;
             }
 
-            // Group files dengan presenter, judul, dan jadwal yang sama
-            const grouped = {};
-            
-            data.forEach(item => {
-                const key = `${item.nama}|||${item.judul}|||${item.tanggal}`;
-                
-                if (!grouped[key]) {
-                    grouped[key] = {
-                        nama: item.nama,
-                        judul: item.judul,
-                        tanggal: item.tanggal,
-                        files: []
-                    };
-                }
-                
-                grouped[key].files.push({
-                    id: item.id,
-                    file_url: item.file_url,
-                    filename: getFilenameFromUrl(item.file_url)
-                });
-            });
-
-            const isLoggedIn = !!localStorage.getItem("token");
+            mobileContainer.innerHTML = '';
 
             // Render mobile cards
             Object.values(grouped).forEach(group => {
@@ -243,21 +247,21 @@ async function loadPresentations() {
                                             class="btn-view"
                                             data-url="${file.file_url}"
                                             title="Lihat file">
-                                            👁️ View
+                                            👁️ VIEW
                                         </button>
                                         <a 
                                             href="${file.file_url}" 
                                             target="_blank"
                                             class="btn-download"
                                             title="Download">
-                                            ⬇️ Download
+                                            ⬇️ DOWNLOAD
                                         </a>
                                         ${isLoggedIn ? `
                                             <button 
                                                 class="btn-delete"
                                                 data-id="${file.id}"
                                                 title="Hapus file">
-                                                🗑️ Delete
+                                                🗑️ DELETE
                                             </button>
                                         ` : ""}
                                     </div>
@@ -268,107 +272,97 @@ async function loadPresentations() {
                 `);
             });
 
-        } catch (err) {
-            console.error(err);
-            mobileContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #dc2626;">Gagal memuat data</p>';
-        }
-        
-        return;
-    }
-    
-    // Desktop/tablet table view
-    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Memuat data...</td></tr>`;
-
-    try {
-        const res = await fetch(`${API_URL}/presentations`);
-        const json = await res.json();
-        const data = json.data || [];
-
-        tbody.innerHTML = "";
-
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Belum ada data.</td></tr>`;
-            return;
-        }
-
-        // Group files dengan presenter, judul, dan jadwal yang sama
-        const grouped = {};
-        
-        data.forEach(item => {
-            const key = `${item.nama}|||${item.judul}|||${item.tanggal}`;
-            
-            if (!grouped[key]) {
-                grouped[key] = {
-                    nama: item.nama,
-                    judul: item.judul,
-                    tanggal: item.tanggal,
-                    files: []
-                };
+        } else {
+            // Desktop/tablet view - gunakan tabel
+            // Pastikan struktur tabel ada
+            if (!tableCard.querySelector('table')) {
+                tableCard.innerHTML = `
+                    <h2>Daftar Presentasi</h2>
+                    <table id="presentationTable">
+                        <thead>
+                            <tr>
+                                <th>Presenter</th>
+                                <th>Judul</th>
+                                <th>Jadwal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                `;
             }
-            
-            grouped[key].files.push({
-                id: item.id,
-                file_url: item.file_url,
-                filename: getFilenameFromUrl(item.file_url)
-            });
-        });
 
-        const isLoggedIn = !!localStorage.getItem("token");
+            const currentTbody = tableCard.querySelector("#presentationTable tbody");
 
-        // Render grouped data
-        Object.values(grouped).forEach(group => {
-            tbody.insertAdjacentHTML("beforeend", `
-                <tr>
-                    <td>${group.nama}</td>
-                    <td>${group.judul}</td>
-                    <td>${new Date(group.tanggal).toLocaleDateString("id-ID", {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}</td>
-                    <td>
-                        <div class="files-container">
-                            ${group.files.map((file, idx) => `
-                                <div class="file-item">
-                                    <span class="file-badge">${idx + 1}</span>
-                                    <span class="file-name">${file.filename}</span>
-                                    <div class="file-actions">
-                                        <button 
-                                            class="btn-view"
-                                            data-url="${file.file_url}"
-                                            title="Lihat file">
-                                            👁️ View
-                                        </button>
-                                        <a 
-                                            href="${file.file_url}" 
-                                            target="_blank"
-                                            class="btn-download"
-                                            title="Download">
-                                            ⬇️ Download
-                                        </a>
-                                        ${isLoggedIn ? `
+            if (data.length === 0) {
+                currentTbody.innerHTML = `<tr><td colspan="4" class="empty-state">Belum ada data.</td></tr>`;
+                return;
+            }
+
+            currentTbody.innerHTML = "";
+
+            // Render grouped data dalam tabel
+            Object.values(grouped).forEach(group => {
+                currentTbody.insertAdjacentHTML("beforeend", `
+                    <tr>
+                        <td>${group.nama}</td>
+                        <td>${group.judul}</td>
+                        <td>${new Date(group.tanggal).toLocaleDateString("id-ID", {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</td>
+                        <td>
+                            <div class="files-container">
+                                ${group.files.map((file, idx) => `
+                                    <div class="file-item">
+                                        <span class="file-badge">${idx + 1}</span>
+                                        <span class="file-name">${file.filename}</span>
+                                        <div class="file-actions">
                                             <button 
-                                                class="btn-delete"
-                                                data-id="${file.id}"
-                                                title="Hapus file">
-                                                🗑️ Delete
+                                                class="btn-view"
+                                                data-url="${file.file_url}"
+                                                title="Lihat file">
+                                                👁️ VIEW
                                             </button>
-                                        ` : ""}
+                                            <a 
+                                                href="${file.file_url}" 
+                                                target="_blank"
+                                                class="btn-download"
+                                                title="Download">
+                                                ⬇️ DOWNLOAD
+                                            </a>
+                                            ${isLoggedIn ? `
+                                                <button 
+                                                    class="btn-delete"
+                                                    data-id="${file.id}"
+                                                    title="Hapus file">
+                                                    🗑️ DELETE
+                                                </button>
+                                            ` : ""}
+                                        </div>
                                     </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </td>
-                </tr>
-            `);
-        });
+                                `).join('')}
+                            </div>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
 
     } catch (err) {
         console.error(err);
-        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Gagal memuat data</td></tr>`;
+        if (isMobile) {
+            const mobileContainer = tableCard.querySelector('#mobileContainer');
+            if (mobileContainer) {
+                mobileContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #dc2626;">Gagal memuat data</p>';
+            }
+        } else {
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Gagal memuat data</td></tr>`;
+        }
     }
 }
 
