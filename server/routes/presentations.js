@@ -36,7 +36,6 @@ router.get("/", async (req, res) => {
 
 /* ==========================
    CREATE – MULTIPLE FILES
-   URUTAN BENAR: auth → upload → handler
 ========================== */
 router.post(
     "/",
@@ -64,7 +63,8 @@ router.post(
             for (const file of files) {
                 const key = `presentations/${Date.now()}-${file.originalname}`;
 
-                const fileUrl = await uploadToR2(
+                // ✅ BACKBLAZE B2 (BENAR)
+                const fileUrl = await uploadToB2(
                     file.buffer,
                     key,
                     file.mimetype
@@ -86,7 +86,7 @@ router.post(
             });
 
         } catch (err) {
-            console.error("POST presentations error:", err.message);
+            console.error("POST presentations error:", err);
             res.status(500).json({ message: "Upload gagal" });
         }
     }
@@ -108,18 +108,19 @@ router.delete("/:id", auth, async (req, res) => {
             return res.status(404).json({ message: "Data tidak ditemukan" });
         }
 
-        // Ambil key setelah bucket name
+        // ✅ Ambil key dari URL Backblaze
+        const url = new URL(row.file_url);
         const key = decodeURIComponent(
-            row.file_url.split(`/${process.env.R2_BUCKET_NAME}/`)[1]
+            url.pathname.replace(`/${process.env.B2_BUCKET_NAME}/`, "")
         );
 
-        await deleteFromR2(key);
+        await deleteFromB2(key);
         await db.query("DELETE FROM presentations WHERE id = ?", [id]);
 
         res.json({ message: "Data berhasil dihapus" });
 
     } catch (err) {
-        console.error("DELETE presentations error:", err.message);
+        console.error("DELETE presentations error:", err);
         res.status(500).json({ message: "Gagal menghapus data" });
     }
 });
