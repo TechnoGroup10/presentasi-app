@@ -1,13 +1,20 @@
-const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const {
+    S3Client,
+    PutObjectCommand,
+    DeleteObjectCommand,
+    GetObjectCommand
+} = require("@aws-sdk/client-s3");
+
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const s3 = new S3Client({
     region: process.env.B2_REGION,
-    endpoint: process.env.B2_ENDPOINT, // ← sekarang valid URL
+    endpoint: process.env.B2_ENDPOINT,
     credentials: {
         accessKeyId: process.env.B2_KEY_ID,
         secretAccessKey: process.env.B2_APPLICATION_KEY
     },
-    forcePathStyle: true // WAJIB untuk Backblaze B2
+    forcePathStyle: true
 });
 
 async function uploadToB2(buffer, key, contentType) {
@@ -18,7 +25,7 @@ async function uploadToB2(buffer, key, contentType) {
         ContentType: contentType
     }));
 
-    return `${process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${encodeURIComponent(key)}`;
+    return key; // 🔴 SIMPAN KEY, BUKAN URL
 }
 
 async function deleteFromB2(key) {
@@ -28,4 +35,17 @@ async function deleteFromB2(key) {
     }));
 }
 
-module.exports = { uploadToB2, deleteFromB2 };
+async function getSignedFileUrl(key, expiresIn = 600) {
+    const command = new GetObjectCommand({
+        Bucket: process.env.B2_BUCKET_NAME,
+        Key: key
+    });
+
+    return await getSignedUrl(s3, command, { expiresIn });
+}
+
+module.exports = {
+    uploadToB2,
+    deleteFromB2,
+    getSignedFileUrl
+};

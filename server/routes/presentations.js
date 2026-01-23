@@ -3,7 +3,11 @@ const router = express.Router();
 const multer = require("multer");
 const auth = require("../middleware/auth");
 const db = require("../db");
-const { uploadToB2, deleteFromB2 } = require("../services/b2");
+const {
+    uploadToB2,
+    deleteFromB2,
+    getSignedFileUrl
+} = require("../services/b2");
 
 /* ==========================
    MULTER CONFIG
@@ -18,13 +22,26 @@ const upload = multer({
 
 /* ==========================
    GET ALL PRESENTATIONS
+   → GENERATE SIGNED URL
 ========================== */
 router.get("/", async (req, res) => {
     try {
         const [rows] = await db.query(
-            "SELECT id, nama, judul, tanggal, file_url FROM presentations ORDER BY tanggal DESC"
+            "SELECT id, nama, judul, tanggal, file_key FROM presentations ORDER BY tanggal DESC"
         );
-        res.json({ data: rows });
+
+        const data = await Promise.all(
+            rows.map(async row => ({
+                id: row.id,
+                nama: row.nama,
+                judul: row.judul,
+                tanggal: row.tanggal,
+                file_url: await getSignedFileUrl(row.file_key, 600) // 10 menit
+            }))
+        );
+
+        res.json({ data });
+
     } catch (err) {
         console.error("❌ DB ERROR:", err);
         res.status(500).json({
@@ -63,8 +80,8 @@ router.post(
             for (const file of files) {
                 const key = `presentations/${Date.now()}-${file.originalname}`;
 
-                // ✅ BACKBLAZE B2 (BENAR)
-                const fileUrl = await uploadToB2(
+                // ✅ Upload ke Backblaze B2 (PRIVATE)
+                const fileKey = await uploadToB2(
                     file.buffer,
                     key,
                     file.mimetype
@@ -72,8 +89,8 @@ router.post(
 
                 insertPromises.push(
                     db.query(
-                        "INSERT INTO presentations (nama, judul, tanggal, file_url) VALUES (?, ?, ?, ?)",
-                        [nama, judul, tanggal, fileUrl]
+                        "INSERT INTO presentations (nama, judul, tanggal, file_key) VALUES (?, ?, ?, ?)",
+                        [nama, judul, tanggal, fileKey]
                     )
                 );
             }
@@ -100,7 +117,7 @@ router.delete("/:id", auth, async (req, res) => {
         const { id } = req.params;
 
         const [[row]] = await db.query(
-            "SELECT file_url FROM presentations WHERE id = ?",
+            "SELECT file_key FROM presentations WHERE id = ?",
             [id]
         );
 
@@ -108,13 +125,7 @@ router.delete("/:id", auth, async (req, res) => {
             return res.status(404).json({ message: "Data tidak ditemukan" });
         }
 
-        // ✅ Ambil key dari URL Backblaze
-        const url = new URL(row.file_url);
-        const key = decodeURIComponent(
-            url.pathname.replace(`/${process.env.B2_BUCKET_NAME}/`, "")
-        );
-
-        await deleteFromB2(key);
+        await deleteFromB2(row.file_key);
         await db.query("DELETE FROM presentations WHERE id = ?", [id]);
 
         res.json({ message: "Data berhasil dihapus" });
