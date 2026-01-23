@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const auth = require("../middleware/auth");
 const db = require("../db");
-const { uploadToR2, deleteFromR2 } = require("../services/r2");
+const { uploadToB2, deleteFromB2 } = require("../services/b2");
 
 /* ==========================
    MULTER CONFIG
